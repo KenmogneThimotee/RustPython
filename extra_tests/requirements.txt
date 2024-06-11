@@ -1,2 +1,3 @@
 bytecode
 pytest
+defusedxml==0.7.1
