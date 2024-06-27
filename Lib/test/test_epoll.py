@@ -236,9 +236,9 @@ class TestEPoll(unittest.TestCase):
         self.assertEqual(cm.exception.errno, errno.EBADF)
 
     def test_close(self):
-        open_file = open(__file__, "rb")
-        self.addCleanup(open_file.close)
-        fd = open_file.fileno()
+        with open(__file__, "rb") as open_file:
+            self.addCleanup(open_file.close)
+            fd = open_file.fileno()
         epoll = select.epoll()
 
         # test fileno() method and closed attribute

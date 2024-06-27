@@ -191,8 +191,8 @@ class TestMockOpen(unittest.TestCase):
     def test_read_data(self):
         mock = mock_open(read_data='foo')
         with patch('%s.open' % __name__, mock, create=True):
-            h = open('bar')
-            result = h.read()
+            with open('bar') as h:
+                result = h.read()
 
         self.assertEqual(result, 'foo')
 
