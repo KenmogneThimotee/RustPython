@@ -21,6 +21,7 @@ from test import libregrtest
 from test import support
 from test.support import os_helper
 from test.libregrtest import utils
+from security import safe_command
 
 
 Py_DEBUG = hasattr(sys, 'gettotalrefcount')
@@ -524,7 +525,7 @@ class BaseTestCase(unittest.TestCase):
             input = ''
         if 'stderr' not in kw:
             kw['stderr'] = subprocess.PIPE
-        proc = subprocess.run(args,
+        proc = safe_command.run(subprocess.run, args,
                               universal_newlines=True,
                               input=input,
                               stdout=subprocess.PIPE,

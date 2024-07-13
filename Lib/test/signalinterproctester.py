@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 import unittest
+from security import safe_command
 
 
 class SIGUSR1Exception(Exception):
@@ -41,7 +42,7 @@ class InterProcessSignalTests(unittest.TestCase):
     def subprocess_send_signal(self, pid, signame):
         code = 'import os, signal; os.kill(%s, signal.%s)' % (pid, signame)
         args = [sys.executable, '-I', '-c', code]
-        return subprocess.Popen(args)
+        return safe_command.run(subprocess.Popen, args)
 
     def test_interprocess_signal(self):
         # Install handlers. This function runs in a sub-process, so we

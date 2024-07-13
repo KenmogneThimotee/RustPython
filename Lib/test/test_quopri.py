@@ -2,6 +2,7 @@ import unittest
 
 import sys, io, subprocess
 import quopri
+from security import safe_command
 
 
 
@@ -182,7 +183,7 @@ zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz''')
 
     def test_scriptencode(self):
         (p, e) = self.STRINGS[-1]
-        process = subprocess.Popen([sys.executable, "-mquopri"],
+        process = safe_command.run(subprocess.Popen, [sys.executable, "-mquopri"],
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         self.addCleanup(process.stdout.close)
         cout, cerr = process.communicate(p)
@@ -198,7 +199,7 @@ zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz''')
 
     def test_scriptdecode(self):
         (p, e) = self.STRINGS[-1]
-        process = subprocess.Popen([sys.executable, "-mquopri", "-d"],
+        process = safe_command.run(subprocess.Popen, [sys.executable, "-mquopri", "-d"],
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         self.addCleanup(process.stdout.close)
         cout, cerr = process.communicate(e)

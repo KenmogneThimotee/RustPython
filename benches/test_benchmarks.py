@@ -5,6 +5,7 @@ import sys
 
 import pytest
 import subprocess
+from security import safe_command
 
 # Interpreters:
 rustpython_exe = '../target/release/rustpython'
@@ -28,7 +29,7 @@ benchmark_ids = [benchmark[0].split('/')[-1] for benchmark in benchmarks]
 @pytest.mark.parametrize('args', benchmarks, ids=benchmark_ids)
 def test_bench(exe, args, benchmark):
     def bench():
-        subprocess.run([exe] + args)
+        safe_command.run(subprocess.run, [exe] + args)
 
     benchmark(bench)
 

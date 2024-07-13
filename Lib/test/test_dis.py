@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import unittest
+from security import safe_command
 
 # This only tests that it prints something in order
 # to avoid changing this test if the bytecode changes
@@ -26,8 +27,7 @@ dis.dis(tested_func)
 dis.dis("x = 2; print(x)")
 """
 
-        result = subprocess.run(
-            self.command + (test_code,), capture_output=True
+        result = safe_command.run(subprocess.run, self.command + (test_code,), capture_output=True
         )
         self.assertNotEqual("", result.stdout.decode())
         self.assertEqual("", result.stderr.decode())
@@ -37,8 +37,7 @@ dis.dis("x = 2; print(x)")
 {self.setup}
 dis.disassemble(tested_func)
 """
-        result = subprocess.run(
-            self.command + (test_code,), capture_output=True
+        result = safe_command.run(subprocess.run, self.command + (test_code,), capture_output=True
         )
         # In CPython this would raise an AttributeError, not a
         # TypeError because dis is implemented in python in CPython and
@@ -49,8 +48,7 @@ dis.disassemble(tested_func)
 {self.setup}
 dis.disassemble(tested_func.__code__)
 """
-        result = subprocess.run(
-            self.command + (test_code,), capture_output=True
+        result = safe_command.run(subprocess.run, self.command + (test_code,), capture_output=True
         )
         self.assertNotEqual("", result.stdout.decode())
         self.assertEqual("", result.stderr.decode())

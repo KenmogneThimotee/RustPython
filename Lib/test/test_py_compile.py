@@ -11,6 +11,7 @@ import unittest
 
 from test import support
 from test.support import os_helper, script_helper
+from security import safe_command
 
 
 def without_source_date_epoch(fxn):
@@ -231,7 +232,7 @@ class PyCompileCLITestCase(unittest.TestCase):
         # subprocess.run() instead of spawn_python() and its friends to test
         # stdin support of the CLI.
         if args and args[0] == '-' and 'input' in kwargs:
-            return subprocess.run([sys.executable, '-m', 'py_compile', '-'],
+            return safe_command.run(subprocess.run, [sys.executable, '-m', 'py_compile', '-'],
                                   input=kwargs['input'].encode(),
                                   capture_output=True)
         return script_helper.assert_python_ok('-m', 'py_compile', *args, **kwargs)
