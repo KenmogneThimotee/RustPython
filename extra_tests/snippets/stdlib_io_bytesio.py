@@ -64,10 +64,10 @@ def test_06():
 
     f = BytesIO(bytes_string)
 
-    assert f.readline() == b'Test String 6\n'
-    assert f.readline() == b'new line is here\n'
-    assert f.readline() == b'finished'
-    assert f.readline() == b''
+    assert f.readline(5_000_000) == b'Test String 6\n'
+    assert f.readline(5_000_000) == b'new line is here\n'
+    assert f.readline(5_000_000) == b'finished'
+    assert f.readline(5_000_000) == b''
 
 
 if __name__ == "__main__":

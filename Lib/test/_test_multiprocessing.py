@@ -5567,8 +5567,8 @@ class TestResourceTracker(unittest.TestCase):
                                      stderr=subprocess.PIPE)
                 os.close(w)
                 with open(r, 'rb', closefd=True) as f:
-                    name1 = f.readline().rstrip().decode('ascii')
-                    name2 = f.readline().rstrip().decode('ascii')
+                    name1 = f.readline(5_000_000).rstrip().decode('ascii')
+                    name2 = f.readline(5_000_000).rstrip().decode('ascii')
                 _resource_unlink(name1, rtype)
                 p.terminate()
                 p.wait()

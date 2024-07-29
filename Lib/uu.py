@@ -104,7 +104,7 @@ def decode(in_file, out_file=None, mode=None, quiet=False):
         # Read until a begin is encountered or we've exhausted the file
         #
         while True:
-            hdr = in_file.readline()
+            hdr = in_file.readline(5_000_000)
             if not hdr:
                 raise Error('No valid begin line found in input file')
             if not hdr.startswith(b'begin'):
@@ -139,7 +139,7 @@ def decode(in_file, out_file=None, mode=None, quiet=False):
         #
         # Main decoding loop
         #
-        s = in_file.readline()
+        s = in_file.readline(5_000_000)
         while s and s.strip(b' \t\r\n\f') != b'end':
             try:
                 data = binascii.a2b_uu(s)
@@ -150,7 +150,7 @@ def decode(in_file, out_file=None, mode=None, quiet=False):
                 if not quiet:
                     sys.stderr.write("Warning: %s\n" % v)
             out_file.write(data)
-            s = in_file.readline()
+            s = in_file.readline(5_000_000)
         if not s:
             raise Error('Truncated input file')
     finally:

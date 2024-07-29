@@ -1326,7 +1326,7 @@ class BuiltinTest(unittest.TestCase):
         fp = open(TESTFN, encoding="utf-8")
         with fp:
             self.assertEqual(fp.readline(4), '1+1\n')
-            self.assertEqual(fp.readline(), 'The quick brown fox jumps over the lazy dog.\n')
+            self.assertEqual(fp.readline(5_000_000), 'The quick brown fox jumps over the lazy dog.\n')
             self.assertEqual(fp.readline(4), 'Dear')
             self.assertEqual(fp.readline(100), ' John\n')
             self.assertEqual(fp.read(300), 'XXX'*100)
@@ -2188,7 +2188,7 @@ class PtyTests(unittest.TestCase):
         with open(r, encoding="utf-8") as rpipe:
             lines = []
             while True:
-                line = rpipe.readline().strip()
+                line = rpipe.readline(5_000_000).strip()
                 if line == "":
                     # The other end was closed => the child exited
                     break
