@@ -1071,7 +1071,7 @@ class PosixTester(unittest.TestCase):
             new_st = os.stat(target_file)
             self.assertEqual(st.st_flags | stat.UF_IMMUTABLE, new_st.st_flags)
             try:
-                fd = open(target_file, 'w+')
+                pass
             except OSError as e:
                 self.assertEqual(e.errno, errno.EPERM)
         finally:

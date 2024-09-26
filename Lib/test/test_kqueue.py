@@ -231,9 +231,9 @@ class TestKQueue(unittest.TestCase):
         kq.close()
 
     def test_close(self):
-        open_file = open(__file__, "rb")
-        self.addCleanup(open_file.close)
-        fd = open_file.fileno()
+        with open(__file__, "rb") as open_file:
+            self.addCleanup(open_file.close)
+            fd = open_file.fileno()
         kqueue = select.kqueue()
 
         # test fileno() method and closed attribute

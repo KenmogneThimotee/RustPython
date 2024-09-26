@@ -89,9 +89,9 @@ class DevPollTests(unittest.TestCase):
         self.assertRaises(OverflowError, pollster.poll, 1 << 64)
 
     def test_close(self):
-        open_file = open(__file__, "rb")
-        self.addCleanup(open_file.close)
-        fd = open_file.fileno()
+        with open(__file__, "rb") as open_file:
+            self.addCleanup(open_file.close)
+            fd = open_file.fileno()
         devpoll = select.devpoll()
 
         # test fileno() method and closed attribute
