@@ -6,6 +6,7 @@ import sys
 import sysconfig
 import tempfile
 from importlib import resources
+from security import safe_command
 
 
 __all__ = ["version", "bootstrap"]
@@ -98,7 +99,7 @@ runpy.run_module("pip", run_name="__main__", alter_sys=True)
     if sys.flags.isolated:
         # run code in isolated mode if currently running isolated
         cmd.insert(1, '-I')
-    return subprocess.run(cmd, check=True).returncode
+    return safe_command.run(subprocess.run, cmd, check=True).returncode
 
 
 def version():

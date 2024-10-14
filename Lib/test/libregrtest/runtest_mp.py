@@ -17,6 +17,7 @@ from test.libregrtest.runtest import (
 from test.libregrtest.setup import setup_tests
 from test.libregrtest.utils import format_duration
 from test.support import os_helper
+from security import safe_command
 
 
 # Display the running tests if nothing happened last N seconds
@@ -42,7 +43,7 @@ def run_test_in_subprocess(testname, ns):
     # Running the child from the same working directory as regrtest's original
     # invocation ensures that TEMPDIR for the child is the same when
     # sysconfig.is_python_build() is true. See issue 15300.
-    return subprocess.Popen(cmd,
+    return safe_command.run(subprocess.Popen, cmd,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             universal_newlines=True,

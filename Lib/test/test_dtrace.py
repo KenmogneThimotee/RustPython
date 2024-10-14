@@ -9,6 +9,7 @@ import unittest
 
 from test import support
 from test.support import findfile
+from security import safe_command
 
 
 if not support.has_subprocess_support:
@@ -68,7 +69,7 @@ class TraceBackend:
 
     def trace(self, script_file, subcommand=None):
         command = self.generate_trace_command(script_file, subcommand)
-        stdout, _ = subprocess.Popen(command,
+        stdout, _ = safe_command.run(subprocess.Popen, command,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT,
                                      universal_newlines=True).communicate()
@@ -189,8 +190,7 @@ class CheckDtraceProbes(unittest.TestCase):
     def get_readelf_version():
         try:
             cmd = ["readelf", "--version"]
-            proc = subprocess.Popen(
-                cmd,
+            proc = safe_command.run(subprocess.Popen, cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 universal_newlines=True,
@@ -217,8 +217,7 @@ class CheckDtraceProbes(unittest.TestCase):
 
     def get_readelf_output(self):
         command = ["readelf", "-n", sys.executable]
-        stdout, _ = subprocess.Popen(
-            command,
+        stdout, _ = safe_command.run(subprocess.Popen, command,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             universal_newlines=True,
