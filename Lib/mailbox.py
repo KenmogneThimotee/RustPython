@@ -1404,7 +1404,7 @@ class Babyl(_singlefileMailbox):
             orig_generator.flatten(message)
             orig_buffer.seek(0)
             while True:
-                line = orig_buffer.readline()
+                line = orig_buffer.readline(5_000_000)
                 self._file.write(line.replace(b'\n', linesep))
                 if line == b'\n' or not line:
                     break
@@ -1414,14 +1414,14 @@ class Babyl(_singlefileMailbox):
                 vis_generator = email.generator.BytesGenerator(vis_buffer, False, 0)
                 vis_generator.flatten(message.get_visible())
                 while True:
-                    line = vis_buffer.readline()
+                    line = vis_buffer.readline(5_000_000)
                     self._file.write(line.replace(b'\n', linesep))
                     if line == b'\n' or not line:
                         break
             else:
                 orig_buffer.seek(0)
                 while True:
-                    line = orig_buffer.readline()
+                    line = orig_buffer.readline(5_000_000)
                     self._file.write(line.replace(b'\n', linesep))
                     if line == b'\n' or not line:
                         break

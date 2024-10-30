@@ -59,10 +59,10 @@ def test_05():
 
     f = StringIO(string)
 
-    assert f.readline() == 'Test String 6\n'
-    assert f.readline() == 'new line is here\n'
-    assert f.readline() == 'finished'
-    assert f.readline() == ''
+    assert f.readline(5_000_000) == 'Test String 6\n'
+    assert f.readline(5_000_000) == 'new line is here\n'
+    assert f.readline(5_000_000) == 'finished'
+    assert f.readline(5_000_000) == ''
 
 if __name__ == "__main__":
     test_01()

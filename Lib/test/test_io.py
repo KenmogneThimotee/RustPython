@@ -1614,7 +1614,7 @@ class CBufferedReaderTest(BufferedReaderTest, SizeofTest):
         rawio.readinto = lambda buf: -1
         bufio = self.tp(rawio)
         with self.assertRaises(OSError) as cm:
-            bufio.readline()
+            bufio.readline(5_000_000)
         self.assertIsNone(cm.exception.__cause__)
 
     # TODO: RUSTPYTHON, TypeError: 'bytes' object cannot be interpreted as an integer")
@@ -1624,7 +1624,7 @@ class CBufferedReaderTest(BufferedReaderTest, SizeofTest):
         rawio.readinto = lambda buf: b''
         bufio = self.tp(rawio)
         with self.assertRaises(OSError) as cm:
-            bufio.readline()
+            bufio.readline(5_000_000)
         self.assertIsInstance(cm.exception.__cause__, TypeError)
 
     # TODO: RUSTPYTHON

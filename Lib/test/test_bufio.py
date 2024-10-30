@@ -29,11 +29,11 @@ class BufferSizeTest:
             f.write(s)
             f.close()
             f = open(os_helper.TESTFN, "rb")
-            line = f.readline()
+            line = f.readline(5_000_000)
             self.assertEqual(line, s + b"\n")
-            line = f.readline()
+            line = f.readline(5_000_000)
             self.assertEqual(line, s)
-            line = f.readline()
+            line = f.readline(5_000_000)
             self.assertFalse(line) # Must be at EOF
             f.close()
         finally:
