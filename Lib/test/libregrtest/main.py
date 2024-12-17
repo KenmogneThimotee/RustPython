@@ -21,6 +21,7 @@ from test.libregrtest.setup import setup_tests
 from test.libregrtest.utils import removepy, count, format_duration, printlist
 from test import support
 from test.support import os_helper, import_helper
+import defusedxml.ElementTree
 
 
 # When tests are run from the Python build directory, it is best practice
@@ -140,7 +141,7 @@ class Regrtest:
             import xml.etree.ElementTree as ET
             for e in xml_data:
                 try:
-                    self.testsuite_xml.append(ET.fromstring(e))
+                    self.testsuite_xml.append(defusedxml.ElementTree.fromstring(e))
                 except ET.ParseError:
                     print(xml_data, file=sys.__stderr__)
                     raise
