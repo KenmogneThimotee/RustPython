@@ -331,32 +331,30 @@ class FileTests(unittest.TestCase):
 
         create_file(os_helper.TESTFN, data)
         self.addCleanup(os_helper.unlink, os_helper.TESTFN)
+        with open(os_helper.TESTFN, 'rb') as in_file:
+            self.addCleanup(in_file.close)
+            in_fd = in_file.fileno()
+            with open(TESTFN2, 'w+b') as out_file:
+                self.addCleanup(os_helper.unlink, TESTFN2)
+                self.addCleanup(out_file.close)
+                out_fd = out_file.fileno()
 
-        in_file = open(os_helper.TESTFN, 'rb')
-        self.addCleanup(in_file.close)
-        in_fd = in_file.fileno()
+            try:
+                i = os.copy_file_range(in_fd, out_fd, 5)
+            except OSError as e:
+                # Handle the case in which Python was compiled
+                # in a system with the syscall but without support
+                # in the kernel.
+                if e.errno != errno.ENOSYS:
+                    raise
+                self.skipTest(e)
+            else:
+                # The number of copied bytes can be less than
+                # the number of bytes originally requested.
+                self.assertIn(i, range(0, 6));
 
-        out_file = open(TESTFN2, 'w+b')
-        self.addCleanup(os_helper.unlink, TESTFN2)
-        self.addCleanup(out_file.close)
-        out_fd = out_file.fileno()
-
-        try:
-            i = os.copy_file_range(in_fd, out_fd, 5)
-        except OSError as e:
-            # Handle the case in which Python was compiled
-            # in a system with the syscall but without support
-            # in the kernel.
-            if e.errno != errno.ENOSYS:
-                raise
-            self.skipTest(e)
-        else:
-            # The number of copied bytes can be less than
-            # the number of bytes originally requested.
-            self.assertIn(i, range(0, 6));
-
-            with open(TESTFN2, 'rb') as in_file:
-                self.assertEqual(in_file.read(), data[:i])
+                with open(TESTFN2, 'rb') as in_file:
+                    self.assertEqual(in_file.read(), data[:i])
 
     @unittest.skipUnless(hasattr(os, 'copy_file_range'), 'test needs os.copy_file_range()')
     def test_copy_file_range_offset(self):
@@ -368,40 +366,38 @@ class FileTests(unittest.TestCase):
 
         create_file(os_helper.TESTFN, data)
         self.addCleanup(os_helper.unlink, os_helper.TESTFN)
+        with open(os_helper.TESTFN, 'rb') as in_file:
+            self.addCleanup(in_file.close)
+            in_fd = in_file.fileno()
+            with open(TESTFN4, 'w+b') as out_file:
+                self.addCleanup(os_helper.unlink, TESTFN4)
+                self.addCleanup(out_file.close)
+                out_fd = out_file.fileno()
 
-        in_file = open(os_helper.TESTFN, 'rb')
-        self.addCleanup(in_file.close)
-        in_fd = in_file.fileno()
+            try:
+                i = os.copy_file_range(in_fd, out_fd, bytes_to_copy,
+                                       offset_src=in_skip,
+                                       offset_dst=out_seek)
+            except OSError as e:
+                # Handle the case in which Python was compiled
+                # in a system with the syscall but without support
+                # in the kernel.
+                if e.errno != errno.ENOSYS:
+                    raise
+                self.skipTest(e)
+            else:
+                # The number of copied bytes can be less than
+                # the number of bytes originally requested.
+                self.assertIn(i, range(0, bytes_to_copy+1));
 
-        out_file = open(TESTFN4, 'w+b')
-        self.addCleanup(os_helper.unlink, TESTFN4)
-        self.addCleanup(out_file.close)
-        out_fd = out_file.fileno()
-
-        try:
-            i = os.copy_file_range(in_fd, out_fd, bytes_to_copy,
-                                   offset_src=in_skip,
-                                   offset_dst=out_seek)
-        except OSError as e:
-            # Handle the case in which Python was compiled
-            # in a system with the syscall but without support
-            # in the kernel.
-            if e.errno != errno.ENOSYS:
-                raise
-            self.skipTest(e)
-        else:
-            # The number of copied bytes can be less than
-            # the number of bytes originally requested.
-            self.assertIn(i, range(0, bytes_to_copy+1));
-
-            with open(TESTFN4, 'rb') as in_file:
-                read = in_file.read()
-            # seeked bytes (5) are zero'ed
-            self.assertEqual(read[:out_seek], b'\x00'*out_seek)
-            # 012 are skipped (in_skip)
-            # 345678 are copied in the file (in_skip + bytes_to_copy)
-            self.assertEqual(read[out_seek:],
-                             data[in_skip:in_skip+i])
+                with open(TESTFN4, 'rb') as in_file:
+                    read = in_file.read()
+                # seeked bytes (5) are zero'ed
+                self.assertEqual(read[:out_seek], b'\x00'*out_seek)
+                # 012 are skipped (in_skip)
+                # 345678 are copied in the file (in_skip + bytes_to_copy)
+                self.assertEqual(read[out_seek:],
+                                 data[in_skip:in_skip+i])
 
     @unittest.skipUnless(hasattr(os, 'splice'), 'test needs os.splice()')
     def test_splice_invalid_values(self):
@@ -416,10 +412,9 @@ class FileTests(unittest.TestCase):
 
         create_file(os_helper.TESTFN, data)
         self.addCleanup(os_helper.unlink, os_helper.TESTFN)
-
-        in_file = open(os_helper.TESTFN, 'rb')
-        self.addCleanup(in_file.close)
-        in_fd = in_file.fileno()
+        with open(os_helper.TESTFN, 'rb') as in_file:
+            self.addCleanup(in_file.close)
+            in_fd = in_file.fileno()
 
         read_fd, write_fd = os.pipe()
         self.addCleanup(lambda: os.close(read_fd))
@@ -451,10 +446,9 @@ class FileTests(unittest.TestCase):
 
         create_file(os_helper.TESTFN, data)
         self.addCleanup(os_helper.unlink, os_helper.TESTFN)
-
-        in_file = open(os_helper.TESTFN, 'rb')
-        self.addCleanup(in_file.close)
-        in_fd = in_file.fileno()
+        with open(os_helper.TESTFN, 'rb') as in_file:
+            self.addCleanup(in_file.close)
+            in_fd = in_file.fileno()
 
         read_fd, write_fd = os.pipe()
         self.addCleanup(lambda: os.close(read_fd))
@@ -494,11 +488,10 @@ class FileTests(unittest.TestCase):
         self.addCleanup(lambda: os.close(read_fd))
         self.addCleanup(lambda: os.close(write_fd))
         os.write(write_fd, data)
-
-        out_file = open(TESTFN4, 'w+b')
-        self.addCleanup(os_helper.unlink, TESTFN4)
-        self.addCleanup(out_file.close)
-        out_fd = out_file.fileno()
+        with open(TESTFN4, 'w+b') as out_file:
+            self.addCleanup(os_helper.unlink, TESTFN4)
+            self.addCleanup(out_file.close)
+            out_fd = out_file.fileno()
 
         try:
             i = os.splice(read_fd, out_fd, bytes_to_copy, offset_dst=out_seek)
