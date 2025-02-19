@@ -10,6 +10,7 @@ from collections import namedtuple
 
 from test import support
 from test.support.script_helper import run_python_until_end
+from security import safe_command
 
 
 # Set the list of ways we expect to be able to ask for the "C" locale
@@ -422,7 +423,7 @@ class LocaleCoercionTests(_LocaleHandlingTestCase):
         # if it's not equal to "C"
         code = 'import locale; print(locale.setlocale(locale.LC_CTYPE, None))'
         env = dict(os.environ, PYTHONCOERCECLOCALE='1')
-        cmd = subprocess.run([sys.executable, '-c', code],
+        cmd = safe_command.run(subprocess.run, [sys.executable, '-c', code],
                              stdout=subprocess.PIPE,
                              env=env,
                              text=True)

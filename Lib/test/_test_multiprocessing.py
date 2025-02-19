@@ -36,6 +36,7 @@ from test.support import script_helper
 from test.support import socket_helper
 from test.support import threading_helper
 from test.support import warnings_helper
+from security import safe_command
 
 
 # Skip tests if _multiprocessing wasn't built.
@@ -4428,7 +4429,7 @@ class _TestSharedMemory(BaseTestCase):
             sys.stdout.flush()
             time.sleep(100)
         '''
-        with subprocess.Popen([sys.executable, '-E', '-c', cmd],
+        with safe_command.run(subprocess.Popen, [sys.executable, '-E', '-c', cmd],
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE) as p:
             name = p.stdout.readline().strip().decode()
@@ -5561,7 +5562,7 @@ class TestResourceTracker(unittest.TestCase):
                     # Artefact resource type used by the resource_tracker
                     continue
                 r, w = os.pipe()
-                p = subprocess.Popen([sys.executable,
+                p = safe_command.run(subprocess.Popen, [sys.executable,
                                      '-E', '-c', cmd.format(w=w, rtype=rtype)],
                                      pass_fds=[w],
                                      stderr=subprocess.PIPE)

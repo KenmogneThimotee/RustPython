@@ -39,6 +39,7 @@ from test.support import threading_helper
 #from _testcapi import INT_MAX, ULLONG_MAX
 from os import SEEK_SET, SEEK_CUR, SEEK_END
 from test.support.os_helper import TESTFN, TESTFN_UNDECODABLE, unlink, temp_dir, FakePath
+from security import safe_command
 
 
 # Helper for temporary memory databases
@@ -1927,8 +1928,7 @@ class MultiprocessTests(unittest.TestCase):
         """
 
         # spawn child process
-        proc = subprocess.Popen(
-            [sys.executable, "-c", SCRIPT],
+        proc = safe_command.run(subprocess.Popen, [sys.executable, "-c", SCRIPT],
             encoding="utf-8",
             bufsize=0,
             stdin=subprocess.PIPE,
