@@ -8,6 +8,7 @@ import shutil
 import sys
 import subprocess
 import threading
+from security import safe_command
 
 __all__ = ["Error", "open", "open_new", "open_new_tab", "get", "register"]
 
@@ -175,9 +176,9 @@ class GenericBrowser(BaseBrowser):
                                  for arg in self.args]
         try:
             if sys.platform[:3] == 'win':
-                p = subprocess.Popen(cmdline)
+                p = safe_command.run(subprocess.Popen, cmdline)
             else:
-                p = subprocess.Popen(cmdline, close_fds=True)
+                p = safe_command.run(subprocess.Popen, cmdline, close_fds=True)
             return not p.wait()
         except OSError:
             return False
@@ -193,9 +194,9 @@ class BackgroundBrowser(GenericBrowser):
         sys.audit("webbrowser.open", url)
         try:
             if sys.platform[:3] == 'win':
-                p = subprocess.Popen(cmdline)
+                p = safe_command.run(subprocess.Popen, cmdline)
             else:
-                p = subprocess.Popen(cmdline, close_fds=True,
+                p = safe_command.run(subprocess.Popen, cmdline, close_fds=True,
                                      start_new_session=True)
             return (p.poll() is None)
         except OSError:
@@ -234,7 +235,7 @@ class UnixBrowser(BaseBrowser):
         else:
             # for TTY browsers, we need stdin/out
             inout = None
-        p = subprocess.Popen(cmdline, close_fds=True, stdin=inout,
+        p = safe_command.run(subprocess.Popen, cmdline, close_fds=True, stdin=inout,
                              stdout=(self.redirect_stdout and inout or None),
                              stderr=inout, start_new_session=True)
         if remote:
