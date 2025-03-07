@@ -360,10 +360,10 @@ class ReadTest(MixInCheckStateHandling):
         s = (s1+s2+s3).encode(self.encoding)
         stream = io.BytesIO(s)
         reader = codecs.getreader(self.encoding)(stream)
-        self.assertEqual(reader.readline(), s1)
-        self.assertEqual(reader.readline(), s2)
-        self.assertEqual(reader.readline(), s3)
-        self.assertEqual(reader.readline(), "")
+        self.assertEqual(reader.readline(5_000_000), s1)
+        self.assertEqual(reader.readline(5_000_000), s2)
+        self.assertEqual(reader.readline(5_000_000), s3)
+        self.assertEqual(reader.readline(5_000_000), "")
 
     def test_bug1098990_b(self):
         s1 = "aaaaaaaaaaaaaaaaaaaaaaaa\r\n"
@@ -375,12 +375,12 @@ class ReadTest(MixInCheckStateHandling):
         s = (s1+s2+s3+s4+s5).encode(self.encoding)
         stream = io.BytesIO(s)
         reader = codecs.getreader(self.encoding)(stream)
-        self.assertEqual(reader.readline(), s1)
-        self.assertEqual(reader.readline(), s2)
-        self.assertEqual(reader.readline(), s3)
-        self.assertEqual(reader.readline(), s4)
-        self.assertEqual(reader.readline(), s5)
-        self.assertEqual(reader.readline(), "")
+        self.assertEqual(reader.readline(5_000_000), s1)
+        self.assertEqual(reader.readline(5_000_000), s2)
+        self.assertEqual(reader.readline(5_000_000), s3)
+        self.assertEqual(reader.readline(5_000_000), s4)
+        self.assertEqual(reader.readline(5_000_000), s5)
+        self.assertEqual(reader.readline(5_000_000), "")
 
     ill_formed_sequence_replace = "\ufffd"
 
@@ -2970,7 +2970,7 @@ class TransformCodecTest(unittest.TestCase):
             with self.subTest(encoding=encoding):
                 sin = codecs.encode(b"\x80", encoding)
                 reader = codecs.getreader(encoding)(io.BytesIO(sin))
-                sout = reader.readline()
+                sout = reader.readline(5_000_000)
                 self.assertEqual(sout, b"\x80")
 
     # TODO: RUSTPYTHON
@@ -3604,12 +3604,12 @@ class StreamRecoderTest(unittest.TestCase):
         bio = io.BytesIO('line1\nline2\nline3\n'.encode('utf-16-le'))
         sr = codecs.EncodedFile(bio, 'utf-8', 'utf-16-le')
 
-        self.assertEqual(sr.readline(), b'line1\n')
+        self.assertEqual(sr.readline(5_000_000), b'line1\n')
         sr.seek(0)
-        self.assertEqual(sr.readline(), b'line1\n')
-        self.assertEqual(sr.readline(), b'line2\n')
-        self.assertEqual(sr.readline(), b'line3\n')
-        self.assertEqual(sr.readline(), b'')
+        self.assertEqual(sr.readline(5_000_000), b'line1\n')
+        self.assertEqual(sr.readline(5_000_000), b'line2\n')
+        self.assertEqual(sr.readline(5_000_000), b'line3\n')
+        self.assertEqual(sr.readline(5_000_000), b'')
 
     def test_seeking_write(self):
         bio = io.BytesIO('123456789\n'.encode('utf-16-le'))
@@ -3619,11 +3619,11 @@ class StreamRecoderTest(unittest.TestCase):
         # and whence are zero.
         sr.seek(2)
         sr.write(b'\nabc\n')
-        self.assertEqual(sr.readline(), b'789\n')
+        self.assertEqual(sr.readline(5_000_000), b'789\n')
         sr.seek(0)
-        self.assertEqual(sr.readline(), b'1\n')
-        self.assertEqual(sr.readline(), b'abc\n')
-        self.assertEqual(sr.readline(), b'789\n')
+        self.assertEqual(sr.readline(5_000_000), b'1\n')
+        self.assertEqual(sr.readline(5_000_000), b'abc\n')
+        self.assertEqual(sr.readline(5_000_000), b'789\n')
 
 
 @unittest.skipIf(_testcapi is None, 'need _testcapi module')

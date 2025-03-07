@@ -1903,7 +1903,7 @@ class RequestBodyTest(TestCase):
 
     def get_headers_and_fp(self):
         f = io.BytesIO(self.sock.data)
-        f.readline()  # read the request line
+        f.readline(5_000_000)  # read the request line
         message = client.parse_headers(f)
         return message, f
 
