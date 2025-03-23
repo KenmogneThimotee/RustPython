@@ -7,6 +7,8 @@ from xml.sax.handler import feature_external_ges
 from xml.dom import pulldom
 
 from test.support import findfile
+import defusedxml.pulldom
+import defusedxml.sax
 
 
 tstfile = findfile("test.xml", subdir="xmltestdata")
@@ -33,20 +35,20 @@ class PullDOMTestCase(unittest.TestCase):
         # fragment.
 
         # Test with a filename:
-        handler = pulldom.parse(tstfile)
+        handler = defusedxml.pulldom.parse(tstfile)
         self.addCleanup(handler.stream.close)
         list(handler)
 
         # Test with a file object:
         with open(tstfile, "rb") as fin:
-            list(pulldom.parse(fin))
+            list(defusedxml.pulldom.parse(fin))
 
     # TODO: RUSTPYTHON implement DOM semantic
     @unittest.expectedFailure
     def test_parse_semantics(self):
         """Test DOMEventStream parsing semantics."""
 
-        items = pulldom.parseString(SMALL_SAMPLE)
+        items = defusedxml.pulldom.parseString(SMALL_SAMPLE)
         evt, node = next(items)
         # Just check the node is a Document:
         self.assertTrue(hasattr(node, "createElement"))
@@ -109,7 +111,7 @@ class PullDOMTestCase(unittest.TestCase):
     @unittest.expectedFailure
     def test_expandItem(self):
         """Ensure expandItem works as expected."""
-        items = pulldom.parseString(SMALL_SAMPLE)
+        items = defusedxml.pulldom.parseString(SMALL_SAMPLE)
         # Loop through the nodes until we get to a "title" start tag:
         for evt, item in items:
             if evt == pulldom.START_ELEMENT and item.tagName == "title":
@@ -142,7 +144,7 @@ class PullDOMTestCase(unittest.TestCase):
     @unittest.expectedFailure
     def test_comment(self):
         """PullDOM does not receive "comment" events."""
-        items = pulldom.parseString(SMALL_SAMPLE)
+        items = defusedxml.pulldom.parseString(SMALL_SAMPLE)
         for evt, _ in items:
             if evt == pulldom.COMMENT:
                 break
@@ -152,7 +154,7 @@ class PullDOMTestCase(unittest.TestCase):
     @unittest.expectedFailure
     def test_end_document(self):
         """PullDOM does not receive "end-document" events."""
-        items = pulldom.parseString(SMALL_SAMPLE)
+        items = defusedxml.pulldom.parseString(SMALL_SAMPLE)
         # Read all of the nodes up to and including </html>:
         for evt, node in items:
             if evt == pulldom.END_ELEMENT and node.tagName == "html":
@@ -166,7 +168,7 @@ class PullDOMTestCase(unittest.TestCase):
                 "Ran out of events, but should have received END_DOCUMENT")
 
     def test_external_ges_default(self):
-        parser = pulldom.parseString(SMALL_SAMPLE)
+        parser = defusedxml.pulldom.parseString(SMALL_SAMPLE)
         saxparser = parser.parser
         ges = saxparser.getFeature(feature_external_ges)
         self.assertEqual(ges, False)
@@ -177,7 +179,7 @@ class ThoroughTestCase(unittest.TestCase):
 
     def test_thorough_parse(self):
         """Test some of the hard-to-reach parts of PullDOM."""
-        self._test_thorough(pulldom.parse(None, parser=SAXExerciser()))
+        self._test_thorough(defusedxml.pulldom.parse(None, parser=SAXExerciser()))
 
     @unittest.expectedFailure
     def test_sax2dom_fail(self):
@@ -308,7 +310,7 @@ class SAX2DOMTestCase(unittest.TestCase):
     def test_basic(self):
         """Ensure SAX2DOM can parse from a stream."""
         with io.StringIO(SMALL_SAMPLE) as fin:
-            sd = SAX2DOMTestHelper(fin, xml.sax.make_parser(),
+            sd = SAX2DOMTestHelper(fin, defusedxml.sax.make_parser(),
                                    len(SMALL_SAMPLE))
             for evt, node in sd:
                 if evt == pulldom.START_ELEMENT and node.tagName == "html":
