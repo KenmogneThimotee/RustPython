@@ -7,6 +7,7 @@ from test import support
 import unittest
 import unittest.test
 from unittest.test.test_result import BufferedWriter
+from security import safe_command
 
 
 class Test_TestProgram(unittest.TestCase):
@@ -456,7 +457,7 @@ class TestCommandLineArgs(unittest.TestCase):
         def run_unittest(args):
             # Use -E to ignore PYTHONSAFEPATH env var
             cmd = [sys.executable, '-E', '-m', 'unittest'] + args
-            p = subprocess.Popen(cmd,
+            p = safe_command.run(subprocess.Popen, cmd,
                 stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, cwd=os.path.dirname(__file__))
             with p:
                 _, stderr = p.communicate()

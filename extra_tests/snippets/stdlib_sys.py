@@ -3,6 +3,7 @@ import os
 import subprocess
 
 from testutils import assert_raises
+from security import safe_command
 
 print('python executable:', sys.executable)
 print(sys.argv)
@@ -115,15 +116,13 @@ env = dict(os.environ)
 env.pop('PYTHONSAFEPATH', None)
 args = (sys.executable, '-P', '-c', code)
 
-proc = subprocess.run(
-    args, stdout=subprocess.PIPE,
+proc = safe_command.run(subprocess.run, args, stdout=subprocess.PIPE,
     universal_newlines=True, env=env)
 assert proc.stdout.rstrip() == 'True', proc
 assert proc.returncode == 0, proc
 
 env['PYTHONSAFEPATH'] = '1'
-proc = subprocess.run(
-    args, stdout=subprocess.PIPE,
+proc = safe_command.run(subprocess.run, args, stdout=subprocess.PIPE,
     universal_newlines=True, env=env)
 assert proc.stdout.rstrip() == 'True'
 assert proc.returncode == 0, proc

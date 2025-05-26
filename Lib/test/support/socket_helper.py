@@ -9,6 +9,7 @@ import unittest
 
 from .. import support
 from . import warnings_helper
+from security import safe_command
 
 HOST = "localhost"
 HOSTv4 = "127.0.0.1"
@@ -298,7 +299,7 @@ def _get_sysctl(name):
 
     # At least Linux and FreeBSD support the "-n" option
     cmd = ['sysctl', '-n', name]
-    proc = subprocess.run(cmd,
+    proc = safe_command.run(subprocess.run, cmd,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT,
                           text=True)

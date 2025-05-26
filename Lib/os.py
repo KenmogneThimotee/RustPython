@@ -27,6 +27,7 @@ import sys
 import stat as st
 
 from _collections_abc import _check_methods
+from security import safe_command
 
 GenericAlias = type(list[int])
 
@@ -990,13 +991,13 @@ if sys.platform != 'vxworks':
             raise ValueError("popen() does not support unbuffered streams")
         import subprocess
         if mode == "r":
-            proc = subprocess.Popen(cmd,
+            proc = safe_command.run(subprocess.Popen, cmd,
                                     shell=True, text=True,
                                     stdout=subprocess.PIPE,
                                     bufsize=buffering)
             return _wrap_close(proc.stdout, proc)
         else:
-            proc = subprocess.Popen(cmd,
+            proc = safe_command.run(subprocess.Popen, cmd,
                                     shell=True, text=True,
                                     stdin=subprocess.PIPE,
                                     bufsize=buffering)

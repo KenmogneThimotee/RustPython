@@ -23,6 +23,7 @@ from urllib.request import (Request, OpenerDirector, HTTPBasicAuthHandler,
 from urllib.parse import urlparse
 import urllib.error
 import http.client
+from security import safe_command
 
 # XXX
 # Request
@@ -1001,7 +1002,7 @@ class HandlerTests(unittest.TestCase):
 
         cmd = [sys.executable, "-c", r"pass"]
         for headers in {}, {"Content-Length": 30}:
-            with subprocess.Popen(cmd, stdout=subprocess.PIPE) as proc:
+            with safe_command.run(subprocess.Popen, cmd, stdout=subprocess.PIPE) as proc:
                 req = Request("http://example.com/", proc.stdout, headers)
                 newreq = h.do_request_(req)
                 if not headers:

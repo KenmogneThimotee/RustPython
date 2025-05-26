@@ -30,6 +30,7 @@ XXX To do:
 - log user-agent header and other interesting goodies
 - send error log to separate file
 """
+from security import safe_command
 
 
 # See also:
@@ -1191,7 +1192,7 @@ class CGIHTTPRequestHandler(SimpleHTTPRequestHandler):
                 nbytes = int(length)
             except (TypeError, ValueError):
                 nbytes = 0
-            p = subprocess.Popen(cmdline,
+            p = safe_command.run(subprocess.Popen, cmdline,
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,

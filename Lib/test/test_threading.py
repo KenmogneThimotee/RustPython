@@ -24,6 +24,7 @@ import traceback
 from unittest import mock
 from test import lock_tests
 from test import support
+from security import safe_command
 
 
 # Between fork() and exec(), only async-safe functions are allowed (issues
@@ -1311,7 +1312,7 @@ class ThreadingExceptionTests(BaseTestCase):
             print('end of main thread')
             """
         expected_output = "end of main thread\n"
-        p = subprocess.Popen([sys.executable, "-c", script],
+        p = safe_command.run(subprocess.Popen, [sys.executable, "-c", script],
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
         data = stdout.decode().replace('\r', '')

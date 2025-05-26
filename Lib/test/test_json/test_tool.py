@@ -8,6 +8,7 @@ import subprocess
 from test import support
 from test.support import os_helper
 from test.support.script_helper import assert_python_ok
+from security import safe_command
 
 
 class TestTool(unittest.TestCase):
@@ -87,7 +88,7 @@ class TestTool(unittest.TestCase):
 
     def test_stdin_stdout(self):
         args = sys.executable, '-m', 'json.tool'
-        process = subprocess.run(args, input=self.data, capture_output=True, text=True, check=True)
+        process = safe_command.run(subprocess.run, args, input=self.data, capture_output=True, text=True, check=True)
         self.assertEqual(process.stdout, self.expect)
         self.assertEqual(process.stderr, '')
 
@@ -142,7 +143,7 @@ class TestTool(unittest.TestCase):
 
     def test_jsonlines(self):
         args = sys.executable, '-m', 'json.tool', '--json-lines'
-        process = subprocess.run(args, input=self.jsonlines_raw, capture_output=True, text=True, check=True)
+        process = safe_command.run(subprocess.run, args, input=self.jsonlines_raw, capture_output=True, text=True, check=True)
         self.assertEqual(process.stdout, self.jsonlines_expect)
         self.assertEqual(process.stderr, '')
 
@@ -169,7 +170,7 @@ class TestTool(unittest.TestCase):
         ]
         ''')
         args = sys.executable, '-m', 'json.tool', '--indent', '2'
-        process = subprocess.run(args, input=input_, capture_output=True, text=True, check=True)
+        process = safe_command.run(subprocess.run, args, input=input_, capture_output=True, text=True, check=True)
         self.assertEqual(process.stdout, expect)
         self.assertEqual(process.stderr, '')
 
@@ -177,7 +178,7 @@ class TestTool(unittest.TestCase):
         input_ = '[1,\n2]'
         expect = '[1, 2]\n'
         args = sys.executable, '-m', 'json.tool', '--no-indent'
-        process = subprocess.run(args, input=input_, capture_output=True, text=True, check=True)
+        process = safe_command.run(subprocess.run, args, input=input_, capture_output=True, text=True, check=True)
         self.assertEqual(process.stdout, expect)
         self.assertEqual(process.stderr, '')
 
@@ -185,7 +186,7 @@ class TestTool(unittest.TestCase):
         input_ = '[1, 2]'
         expect = '[\n\t1,\n\t2\n]\n'
         args = sys.executable, '-m', 'json.tool', '--tab'
-        process = subprocess.run(args, input=input_, capture_output=True, text=True, check=True)
+        process = safe_command.run(subprocess.run, args, input=input_, capture_output=True, text=True, check=True)
         self.assertEqual(process.stdout, expect)
         self.assertEqual(process.stderr, '')
 
@@ -193,7 +194,7 @@ class TestTool(unittest.TestCase):
         input_ = '[ 1 ,\n 2]'
         expect = '[1,2]\n'
         args = sys.executable, '-m', 'json.tool', '--compact'
-        process = subprocess.run(args, input=input_, capture_output=True, text=True, check=True)
+        process = safe_command.run(subprocess.run, args, input=input_, capture_output=True, text=True, check=True)
         self.assertEqual(process.stdout, expect)
         self.assertEqual(process.stderr, '')
 
@@ -222,7 +223,7 @@ class TestTool(unittest.TestCase):
     @unittest.skipIf(sys.platform =="win32", "The test is failed with ValueError on Windows")
     def test_broken_pipe_error(self):
         cmd = [sys.executable, '-m', 'json.tool']
-        proc = subprocess.Popen(cmd,
+        proc = safe_command.run(subprocess.Popen, cmd,
                                 stdout=subprocess.PIPE,
                                 stdin=subprocess.PIPE)
         # bpo-39828: Closing before json.tool attempts to write into stdout.

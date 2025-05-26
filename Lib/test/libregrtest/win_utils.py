@@ -4,6 +4,7 @@ import os
 import subprocess
 import uuid
 from test import support
+from security import safe_command
 
 
 # Max size of asynchronous reads
@@ -55,7 +56,7 @@ class WindowsLoadTracker():
 
         # Spawn off the load monitor
         command = ['typeperf', COUNTER_NAME, '-si', str(SAMPLING_INTERVAL)]
-        self.p = subprocess.Popen(command, stdout=command_stdout, cwd=os_helper.SAVEDCWD)
+        self.p = safe_command.run(subprocess.Popen, command, stdout=command_stdout, cwd=os_helper.SAVEDCWD)
 
         # Close our copy of the write end of the pipe
         os.close(command_stdout)

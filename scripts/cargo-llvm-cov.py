@@ -1,5 +1,6 @@
 import os
 import subprocess
+from security import safe_command
 
 TARGET = "extra_tests/snippets"
 
@@ -7,7 +8,7 @@ def run_llvm_cov(file_path: str):
     """ Run cargo llvm-cov on a file. """
     if file_path.endswith(".py"):
         command = ["cargo", "llvm-cov", "--no-report", "run", "--", file_path]
-        subprocess.call(command)
+        safe_command.run(subprocess.call, command)
 
 def iterate_files(folder: str):
     """ Iterate over all files in a folder. """

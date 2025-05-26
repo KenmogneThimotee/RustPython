@@ -14,6 +14,7 @@ from test.support.script_helper import (
     spawn_python, kill_python, assert_python_ok, assert_python_failure,
     interpreter_requires_environment
 )
+from security import safe_command
 
 if not support.has_subprocess_support:
     raise unittest.SkipTest("test module requires subprocess")
@@ -126,7 +127,7 @@ class CmdLineTest(unittest.TestCase):
             cmd = [sys.executable]
             cmd.extend(args)
             PIPE = subprocess.PIPE
-            p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE)
+            p = safe_command.run(subprocess.Popen, cmd, stdout=PIPE, stderr=PIPE)
             out, err = p.communicate()
             p.stdout.close()
             p.stderr.close()
@@ -242,8 +243,7 @@ class CmdLineTest(unittest.TestCase):
             b'import locale; '
             b'print(ascii("' + undecodable + b'"), '
                 b'locale.getencoding())')
-        p = subprocess.Popen(
-            [sys.executable, "-c", code],
+        p = safe_command.run(subprocess.Popen, [sys.executable, "-c", code],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             env=env)
         stdout, stderr = p.communicate()
@@ -280,20 +280,20 @@ class CmdLineTest(unittest.TestCase):
         # TODO: RUSTPYTHON
         def run_default(arg):
             cmd = [sys.executable, '-c', code, arg]
-            return subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
+            return safe_command.run(subprocess.run, cmd, stdout=subprocess.PIPE, text=True)
 
         # TODO: RUSTPYTHON
         def run_c_locale(arg):
             cmd = [sys.executable, '-c', code, arg]
             env = dict(os.environ)
             env['LC_ALL'] = 'C'
-            return subprocess.run(cmd, stdout=subprocess.PIPE,
+            return safe_command.run(subprocess.run, cmd, stdout=subprocess.PIPE,
                                   text=True, env=env)
 
         # TODO: RUSTPYTHON
         def run_utf8_mode(arg):
             cmd = [sys.executable, '-X', 'utf8', '-c', code, arg]
-            return subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
+            return safe_command.run(subprocess.run, cmd, stdout=subprocess.PIPE, text=True)
 
         valid_utf8 = 'e:\xe9, euro:\u20ac, non-bmp:\U0010ffff'.encode('utf-8')
         # invalid UTF-8 byte sequences with a valid UTF-8 sequence
@@ -327,8 +327,7 @@ class CmdLineTest(unittest.TestCase):
         # to parse the command line arguments on Mac OS X and Android.
         env['LC_ALL'] = 'C'
 
-        p = subprocess.Popen(
-            (sys.executable, "-c", code, text),
+        p = safe_command.run(subprocess.Popen, (sys.executable, "-c", code, text),
             stdout=subprocess.PIPE,
             env=env)
         stdout, stderr = p.communicate()
@@ -346,7 +345,7 @@ class CmdLineTest(unittest.TestCase):
             print(err.isatty(), err.write_through, err.line_buffering)
         """)
         args = [sys.executable, '-c', code]
-        proc = subprocess.run(args, stdout=subprocess.PIPE,
+        proc = safe_command.run(subprocess.run, args, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE, text=True, check=True)
         self.assertEqual(proc.stdout,
                          'False False False\n'
@@ -421,8 +420,7 @@ class CmdLineTest(unittest.TestCase):
         for encoding in ('ascii', 'latin-1', 'utf-8'):
             env = os.environ.copy()
             env['PYTHONIOENCODING'] = encoding
-            p = subprocess.Popen(
-                [sys.executable, '-i'],
+            p = safe_command.run(subprocess.Popen, [sys.executable, '-i'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -441,8 +439,7 @@ class CmdLineTest(unittest.TestCase):
             stdin.write(sep.join((b'abc', b'def')))
             stdin.flush()
             stdin.seek(0)
-            with subprocess.Popen(
-                (sys.executable, "-c", code),
+            with safe_command.run(subprocess.Popen, (sys.executable, "-c", code),
                 stdin=stdin, stdout=subprocess.PIPE) as proc:
                 stdout, stderr = proc.communicate()
         self.assertEqual(stdout.rstrip(), expected)
@@ -532,8 +529,7 @@ class CmdLineTest(unittest.TestCase):
                 os.close(1)
             if 'stderr' in streams:
                 os.close(2)
-        p = subprocess.Popen(
-            [sys.executable, "-E", "-c", code],
+        p = safe_command.run(subprocess.Popen, [sys.executable, "-E", "-c", code],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -725,7 +721,7 @@ class CmdLineTest(unittest.TestCase):
             args = (sys.executable, '-X', 'dev', *args)
         else:
             args = (sys.executable, *args)
-        proc = subprocess.run(args,
+        proc = safe_command.run(subprocess.run, args,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT,
                               universal_newlines=True,
@@ -808,7 +804,7 @@ class CmdLineTest(unittest.TestCase):
         env = dict(os.environ)
         env.pop('PYTHONDEVMODE', None)
         env["PYTHONWARNINGS"] = envvar
-        proc = subprocess.run(args,
+        proc = safe_command.run(subprocess.run, args,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT,
                               universal_newlines=True,
@@ -848,7 +844,7 @@ class CmdLineTest(unittest.TestCase):
         else:
             env.pop('PYTHONMALLOC', None)
         args = (sys.executable, '-c', code)
-        proc = subprocess.run(args,
+        proc = safe_command.run(subprocess.run, args,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT,
                               universal_newlines=True,
@@ -893,13 +889,13 @@ class CmdLineTest(unittest.TestCase):
         env.pop('PYTHONDEVMODE', None)
         args = (sys.executable, '-c', code)
 
-        proc = subprocess.run(args, stdout=subprocess.PIPE,
+        proc = safe_command.run(subprocess.run, args, stdout=subprocess.PIPE,
                               universal_newlines=True, env=env)
         self.assertEqual(proc.stdout.rstrip(), 'False')
         self.assertEqual(proc.returncode, 0, proc)
 
         env['PYTHONDEVMODE'] = '1'
-        proc = subprocess.run(args, stdout=subprocess.PIPE,
+        proc = safe_command.run(subprocess.run, args, stdout=subprocess.PIPE,
                               universal_newlines=True, env=env)
         self.assertEqual(proc.stdout.rstrip(), 'True')
         self.assertEqual(proc.returncode, 0, proc)
@@ -911,7 +907,7 @@ class CmdLineTest(unittest.TestCase):
         prefix, exe = os.path.split(sys.executable)
         executable = prefix + '\\.\\.\\.\\' + exe
 
-        proc = subprocess.run(args, stdout=subprocess.PIPE,
+        proc = safe_command.run(subprocess.run, args, stdout=subprocess.PIPE,
                               executable=executable)
         self.assertEqual(proc.returncode, 0, proc)
         self.assertEqual(proc.stdout.strip(), b'0')
@@ -920,7 +916,7 @@ class CmdLineTest(unittest.TestCase):
     @unittest.expectedFailure
     def test_parsing_error(self):
         args = [sys.executable, '-I', '--unknown-option']
-        proc = subprocess.run(args,
+        proc = safe_command.run(subprocess.run, args,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE,
                               text=True)
@@ -1009,7 +1005,7 @@ class IgnoreEnvironmentTest(unittest.TestCase):
 
 class SyntaxErrorTests(unittest.TestCase):
     def check_string(self, code):
-        proc = subprocess.run([sys.executable, "-"], input=code,
+        proc = safe_command.run(subprocess.run, [sys.executable, "-"], input=code,
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotEqual(proc.stderr, None)

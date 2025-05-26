@@ -1,4 +1,5 @@
 """Supporting definitions for the Python regression tests."""
+from security import safe_command
 
 if __name__ != 'test.support':
     raise ImportError('support must be imported from the test package')
@@ -939,7 +940,7 @@ class _MemoryWatchdog:
         import subprocess
         with f:
             watchdog_script = findfile("memory_watchdog.py")
-            self.mem_watchdog = subprocess.Popen([sys.executable, watchdog_script],
+            self.mem_watchdog = safe_command.run(subprocess.Popen, [sys.executable, watchdog_script],
                                                  stdin=f,
                                                  stderr=subprocess.DEVNULL)
         self.started = True
@@ -1584,7 +1585,7 @@ class PythonSymlink:
     def _call(self, python, args, env, returncode):
         import subprocess
         cmd = [python, *args]
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+        p = safe_command.run(subprocess.Popen, cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, env=env)
         r = p.communicate()
         if p.returncode != returncode:
@@ -1768,7 +1769,7 @@ class SuppressCrashReport:
                 # that might trigger the next manager.
                 cmd = ['/usr/bin/defaults', 'read',
                        'com.apple.CrashReporter', 'DialogType']
-                proc = subprocess.Popen(cmd,
+                proc = safe_command.run(subprocess.Popen, cmd,
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)
                 with proc:
@@ -2386,7 +2387,7 @@ def setup_venv_with_pip_setuptools_wheel(venv_dir):
         if verbose:
             print()
             print('Run:', ' '.join(cmd))
-        subprocess.run(cmd, check=True)
+        safe_command.run(subprocess.run, cmd, check=True)
 
         venv = os.path.join(temp_dir, venv_dir)
 
@@ -2404,7 +2405,7 @@ def setup_venv_with_pip_setuptools_wheel(venv_dir):
         if verbose:
             print()
             print('Run:', ' '.join(cmd))
-        subprocess.run(cmd, check=True)
+        safe_command.run(subprocess.run, cmd, check=True)
 
         yield python
 

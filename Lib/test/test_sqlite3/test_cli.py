@@ -7,6 +7,7 @@ import unittest
 
 from test.support import SHORT_TIMEOUT#, requires_subprocess
 from test.support.os_helper import TESTFN, unlink
+from security import safe_command
 
 
 # TODO: RUSTPYTHON
@@ -14,8 +15,7 @@ from test.support.os_helper import TESTFN, unlink
 class CommandLineInterface(unittest.TestCase):
 
     def _do_test(self, *args, expect_success=True):
-        with subprocess.Popen(
-            [sys.executable, "-Xutf8", "-m", "sqlite3", *args],
+        with safe_command.run(subprocess.Popen, [sys.executable, "-Xutf8", "-m", "sqlite3", *args],
             encoding="utf-8",
             bufsize=0,
             stdout=subprocess.PIPE,
@@ -78,8 +78,7 @@ class InteractiveSession(unittest.TestCase):
     PS2 = "... "
 
     def start_cli(self, *args):
-        return subprocess.Popen(
-            [sys.executable, "-Xutf8", "-m", "sqlite3", *args],
+        return safe_command.run(subprocess.Popen, [sys.executable, "-Xutf8", "-m", "sqlite3", *args],
             encoding="utf-8",
             bufsize=0,
             stdin=subprocess.PIPE,

@@ -48,6 +48,7 @@ import os
 import sys
 
 from enum import Enum
+from security import safe_command
 
 
 __author__ = 'Ka-Ping Yee <ping@zesty.ca>'
@@ -372,7 +373,7 @@ def _get_command_stdout(command, *args):
         # for are actually localized, but in theory some system could do so.)
         env = dict(os.environ)
         env['LC_ALL'] = 'C'
-        proc = subprocess.Popen((executable,) + args,
+        proc = safe_command.run(subprocess.Popen, (executable,) + args,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.DEVNULL,
                                 env=env)
