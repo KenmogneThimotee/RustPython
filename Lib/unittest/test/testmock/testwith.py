@@ -203,21 +203,21 @@ class TestMockOpen(unittest.TestCase):
         mock = mock_open(read_data='foo\nbar\nbaz\n')
         with patch('%s.open' % __name__, mock, create=True):
             h = open('bar')
-            line1 = h.readline()
-            line2 = h.readline()
-            line3 = h.readline()
+            line1 = h.readline(5_000_000)
+            line2 = h.readline(5_000_000)
+            line3 = h.readline(5_000_000)
         self.assertEqual(line1, 'foo\n')
         self.assertEqual(line2, 'bar\n')
         self.assertEqual(line3, 'baz\n')
-        self.assertEqual(h.readline(), '')
+        self.assertEqual(h.readline(5_000_000), '')
 
         # Check that we properly emulate a file that doesn't end in a newline
         mock = mock_open(read_data='foo')
         with patch('%s.open' % __name__, mock, create=True):
             h = open('bar')
-            result = h.readline()
+            result = h.readline(5_000_000)
         self.assertEqual(result, 'foo')
-        self.assertEqual(h.readline(), '')
+        self.assertEqual(h.readline(5_000_000), '')
 
 
     def test_dunder_iter_data(self):
@@ -229,7 +229,7 @@ class TestMockOpen(unittest.TestCase):
         self.assertEqual(lines[0], 'foo\n')
         self.assertEqual(lines[1], 'bar\n')
         self.assertEqual(lines[2], 'baz\n')
-        self.assertEqual(h.readline(), '')
+        self.assertEqual(h.readline(5_000_000), '')
         with self.assertRaises(StopIteration):
             next(h)
 
@@ -245,7 +245,7 @@ class TestMockOpen(unittest.TestCase):
         self.assertEqual(line1, 'foo\n')
         self.assertEqual(line2, 'bar\n')
         self.assertEqual(lines[0], 'baz\n')
-        self.assertEqual(h.readline(), '')
+        self.assertEqual(h.readline(5_000_000), '')
 
     def test_readlines_data(self):
         # Test that emulating a file that ends in a newline character works
@@ -277,9 +277,9 @@ class TestMockOpen(unittest.TestCase):
         m = mock_open(read_data=b'abc\ndef\nghi\n')
         with patch('%s.open' % __name__, m, create=True):
             with open('abc', 'rb') as f:
-                line1 = f.readline()
-                line2 = f.readline()
-                line3 = f.readline()
+                line1 = f.readline(5_000_000)
+                line2 = f.readline(5_000_000)
+                line3 = f.readline(5_000_000)
         self.assertEqual(line1, b'abc\n')
         self.assertEqual(line2, b'def\n')
         self.assertEqual(line3, b'ghi\n')
@@ -312,7 +312,7 @@ class TestMockOpen(unittest.TestCase):
         mock = mock_open(read_data='foo\nbar\nbaz\n')
         with patch('%s.open' % __name__, mock, create=True):
             h = open('bar')
-            line1 = h.readline()
+            line1 = h.readline(5_000_000)
             rest = h.readlines()
         self.assertEqual(line1, 'foo\n')
         self.assertEqual(rest, ['bar\n', 'baz\n'])
@@ -320,7 +320,7 @@ class TestMockOpen(unittest.TestCase):
         mock = mock_open(read_data='foo\nbar\nbaz\n')
         with patch('%s.open' % __name__, mock, create=True):
             h = open('bar')
-            line1 = h.readline()
+            line1 = h.readline(5_000_000)
             rest = h.read()
         self.assertEqual(line1, 'foo\n')
         self.assertEqual(rest, 'bar\nbaz\n')
